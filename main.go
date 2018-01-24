@@ -20,7 +20,7 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/play/", PlaySound).Methods("Get")
+	router.HandleFunc("/play/{sound}", PlayHandler).Methods("Get")
 
 	srv := &http.Server{
 		Addr: fmt.Sprintf("0.0.0.0:%d", port),
@@ -38,15 +38,17 @@ func main() {
 
 }
 
-// PlaySound plays a sound
-func PlaySound(w http.ResponseWriter, r *http.Request) {
-	f, _ := os.Open("test.mp3")
+// PlayHandler plays a sound
+func PlayHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	f, _ := os.Open(vars["sound"] + ".mp3")
+
 	s, format, _ := mp3.Decode(f)
 
 	speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
 
 	speaker.Play(s)
-
 }
 
 // Middleware-like function to be able to log incoming requests
